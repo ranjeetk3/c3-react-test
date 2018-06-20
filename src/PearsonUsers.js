@@ -1,9 +1,15 @@
 import React, { Component } from "react";
 
+import "./PearsonUser.css";
+import { UserRecords } from "./UserRecords";
+import { getPearsonUsers } from "./services/getPearsonUsers";
+
 export class PearsonUsers extends Component {
+
   constructor(props) {
     super(props);
-
+    this.removeDuplct = this.removeDuplct.bind(this);
+    this.updateUsers = this.updateUsers.bind(this);
     this.state = {
       users: [
         {
@@ -31,11 +37,39 @@ export class PearsonUsers extends Component {
     };
   }
 
+  componentDidMount() {
+    let userList = this.state.users;
+    getPearsonUsers(data => {
+      userList = userList.concat(data.data);
+      userList =  this.removeDuplct(userList,'id');
+      this.setState({users :userList});
+   });
+
+  }
+
+  removeDuplct( arr, prop ) {
+    let obj = {};
+    let newArrayList = [];
+    let len = arr.length;
+    for ( let i = 0; i < len; i++ ) {
+      if (!obj[arr[i][prop]]) obj[arr[i][prop]] = arr[i];
+    }
+
+    for ( let key in obj ) newArrayList.push(obj[key]);
+
+    return newArrayList;
+  }
+
+  updateUsers( userList ) {
+    this.setState({users: userList});
+  }
+
   render() {
+    const users = this.state.users;
     return (
-      <div className="pearon-users">
-        <h1>Pearson User Management</h1>
-        {/* Render users here */}
+      <div className="pearson-users">
+        <h1 className='title'>Pearson User Management</h1>
+         <UserRecords users={users} updateUsers= {this.updateUsers} />
       </div>
     );
   }
